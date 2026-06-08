@@ -37,11 +37,8 @@ git clone https://github.com/ANOUARELIDRISSI/PFA-BI-Ensias.git
 cd PFA-BI-Ensias
 ```
 
-Le dossier `AI-Agent` est configure comme un sous-module Git :
-
-```powershell
-git submodule update --init --recursive
-```
+Le dossier `AI-Agent` est inclus directement dans le depot principal. Aucune
+commande de sous-module n'est necessaire.
 
 ## 3. Installer les dependances
 
