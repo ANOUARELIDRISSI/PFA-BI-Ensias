@@ -1,6 +1,7 @@
-# Guide de demarrage
+# Demarrage et test des scrapers
 
-Ce guide explique comment installer et lancer le projet apres un nouveau clonage du depot.
+Ce guide explique comment installer et lancer les scrapers apres un nouveau
+clonage du depot.
 
 ## 1. Prerequis
 
@@ -36,9 +37,6 @@ uv --version
 git clone https://github.com/ANOUARELIDRISSI/PFA-BI-Ensias.git
 cd PFA-BI-Ensias
 ```
-
-Le dossier `AI-Agent` est inclus directement dans le depot principal. Aucune
-commande de sous-module n'est necessaire.
 
 ## 3. Installer les dependances
 
@@ -110,37 +108,13 @@ uv run python scraping/scrape_sarouty.py --overwrite
 
 Chaque source produit son propre fichier CSV et JSON dans `data/raw`.
 
-## 7. Utiliser l'agent IA
-
-L'agent possede actuellement son propre environnement Python.
-
-```powershell
-cd AI-Agent
-uv sync
-```
-
-Creer ensuite le fichier local `.env` a partir de l'exemple :
-
-```powershell
-Copy-Item .env.example .env
-```
-
-Ajouter les cles API necessaires dans `.env`, puis lancer l'agent :
-
-```powershell
-uv run python main.py
-```
-
-Ne jamais enregistrer le fichier `.env` ou les cles API dans Git.
-
-## 8. Structure utile
+## 7. Structure utile
 
 ```text
 PFA-BI-Ensias/
-|-- AI-Agent/            # Agent IA
 |-- data/
 |   `-- raw/             # Donnees collectees
-|-- DEMARRAGE.md         # Ce guide
+|-- DEMARRAGE_SCRAPERS.md
 |-- scraping/
 |   |-- scrape_mubawab.py
 |   `-- scrape_sarouty.py
@@ -149,7 +123,7 @@ PFA-BI-Ensias/
 `-- README.md
 ```
 
-## 9. Mise a jour du projet
+## 8. Mise a jour du projet
 
 Pour recuperer les dernieres modifications :
 
@@ -158,14 +132,7 @@ git pull
 uv sync
 ```
 
-Si les dependances de l'agent ont egalement change :
-
-```powershell
-cd AI-Agent
-uv sync
-```
-
-## 10. Problemes courants
+## 9. Problemes courants
 
 Verifier que les commandes sont executees depuis la racine `PFA-BI-Ensias`.
 

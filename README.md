@@ -128,3 +128,8 @@ PFA-BI-Ensias/
 ## Statut
 
 Le projet est actuellement en phase d'initialisation et de conception.
+
+## Guides de demarrage
+
+- [Demarrage des scrapers](DEMARRAGE_SCRAPERS.md)
+- [Demarrage de l'agent IA](DEMARRAGE_AGENT.md)
