@@ -1,0 +1,3 @@
+[submodule "3sso-AI-Agent"]
+	path = 3sso-AI-Agent
+	url = https://github.com/ANOUARELIDRISSI/3sso-AI-Agent.git
