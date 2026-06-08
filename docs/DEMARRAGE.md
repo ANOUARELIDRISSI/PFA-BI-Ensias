@@ -37,7 +37,7 @@ git clone https://github.com/ANOUARELIDRISSI/PFA-BI-Ensias.git
 cd PFA-BI-Ensias
 ```
 
-Si le dossier `3sso-AI-Agent` est configure comme un sous-module Git :
+Le dossier `AI-Agent` est configure comme un sous-module Git :
 
 ```powershell
 git submodule update --init --recursive
@@ -118,7 +118,7 @@ Chaque source produit son propre fichier CSV et JSON dans `data/raw`.
 L'agent possede actuellement son propre environnement Python.
 
 ```powershell
-cd 3sso-AI-Agent
+cd AI-Agent
 uv sync
 ```
 
@@ -140,7 +140,7 @@ Ne jamais enregistrer le fichier `.env` ou les cles API dans Git.
 
 ```text
 PFA-BI-Ensias/
-|-- 3sso-AI-Agent/       # Agent IA
+|-- AI-Agent/            # Agent IA
 |-- data/
 |   `-- raw/             # Donnees collectees
 |-- docs/
@@ -165,7 +165,7 @@ uv sync
 Si les dependances de l'agent ont egalement change :
 
 ```powershell
-cd 3sso-AI-Agent
+cd AI-Agent
 uv sync
 ```
 

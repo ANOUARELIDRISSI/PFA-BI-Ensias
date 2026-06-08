@@ -49,6 +49,7 @@ Le pipeline de Machine Learning couvrira :
 
 L'agent sera adapte a partir du depot suivant :
 
+[AI-Agent](AI-Agent), adapte depuis
 [ANOUARELIDRISSI/3sso-AI-Agent](https://github.com/ANOUARELIDRISSI/3sso-AI-Agent.git)
 
 Il sera modifie pour repondre aux besoins du domaine immobilier marocain. Il orchestrera notamment :
@@ -120,7 +121,7 @@ PFA-BI-Ensias/
 5. Construire le pipeline de nettoyage et de stockage.
 6. Realiser l'analyse exploratoire.
 7. Entrainer et evaluer les modeles de prediction.
-8. Adapter l'agent `3sso-AI-Agent` et integrer Mistral.
+8. Adapter le module `AI-Agent` et integrer Mistral.
 9. Exposer les fonctionnalites par une API.
 10. Developper l'interface web en francais.
 
