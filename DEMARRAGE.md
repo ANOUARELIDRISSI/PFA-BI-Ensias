@@ -143,8 +143,7 @@ PFA-BI-Ensias/
 |-- AI-Agent/            # Agent IA
 |-- data/
 |   `-- raw/             # Donnees collectees
-|-- docs/
-|   `-- DEMARRAGE.md     # Ce guide
+|-- DEMARRAGE.md         # Ce guide
 |-- scraping/
 |   |-- scrape_mubawab.py
 |   `-- scrape_sarouty.py
