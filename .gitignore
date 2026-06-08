@@ -5,3 +5,6 @@ __pycache__/
 data/raw/*.csv
 data/raw/*.json
 data/raw/*.jsonl
+data/processed/*.csv
+models/*.joblib
+reports/*.json

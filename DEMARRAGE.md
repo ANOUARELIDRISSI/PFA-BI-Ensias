@@ -136,7 +136,23 @@ uv run python main.py
 
 Ne jamais enregistrer le fichier `.env` ou les cles API dans Git.
 
-## 8. Structure utile
+## 8. Nettoyer les donnees et entrainer le modele
+
+Depuis la racine du projet :
+
+```powershell
+uv sync
+uv run python -m ml.clean_data
+uv run python -m ml.train
+```
+
+Tester une prediction :
+
+```powershell
+uv run python -m ml.predict --surface 100 --rooms 3 --bedrooms 2 --bathrooms 2 --city Casablanca --neighborhood Maarif --furnished NO
+```
+
+## 9. Structure utile
 
 ```text
 PFA-BI-Ensias/
@@ -144,6 +160,9 @@ PFA-BI-Ensias/
 |-- data/
 |   `-- raw/             # Donnees collectees
 |-- DEMARRAGE.md         # Ce guide
+|-- ml/                  # Nettoyage, entrainement et prediction
+|-- models/              # Modele entraine
+|-- reports/             # Metriques d'evaluation
 |-- scraping/
 |   |-- scrape_mubawab.py
 |   `-- scrape_sarouty.py
@@ -152,7 +171,7 @@ PFA-BI-Ensias/
 `-- README.md
 ```
 
-## 9. Mise a jour du projet
+## 10. Mise a jour du projet
 
 Pour recuperer les dernieres modifications :
 
@@ -168,7 +187,7 @@ cd AI-Agent
 uv sync
 ```
 
-## 10. Problemes courants
+## 11. Problemes courants
 
 Verifier que les commandes sont executees depuis la racine `PFA-BI-Ensias`.
 
