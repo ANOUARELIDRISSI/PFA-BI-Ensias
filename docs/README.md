@@ -24,6 +24,9 @@ presenter une idee comme un resultat deja livre.
 
 ## Pages
 
+- [Demarrage rapide](../QUICK_RUN.md)
+- [Demarrage des scrapers](DEMARRAGE_SCRAPERS.md)
+- [Demarrage de l'agent IA](DEMARRAGE_AGENT.md)
 - [Architecture et configuration](ARCHITECTURE.md)
 - [Collecte et schema des donnees](COLLECTE_DONNEES.md)
 - [Pipeline Machine Learning](MACHINE_LEARNING.md)
@@ -32,6 +35,8 @@ presenter une idee comme un resultat deja livre.
 - [Interface Streamlit](INTERFACE_STREAMLIT.md)
 - [Tests et verification](TESTS.md)
 - [Fonctionnalites suivantes](ROADMAP.md)
+- [Recherche immobiliere en ligne](RECHERCHE_EN_LIGNE.md)
+- [Roadmap historique de l'agent](AGENT_ROADMAP.md)
 
 ## Demarrage rapide
 

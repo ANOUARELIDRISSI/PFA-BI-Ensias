@@ -139,7 +139,8 @@ PFA-BI-Ensias/
 |-- data/
 |   `-- raw/             # Donnees collectees
 |-- ml/
-|-- DEMARRAGE_SCRAPERS.md
+|-- docs/
+|   `-- DEMARRAGE_SCRAPERS.md
 |-- scraping/
 |   |-- scrape_mubawab.py
 |   `-- scrape_sarouty.py

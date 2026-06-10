@@ -133,8 +133,9 @@ d'une interface Streamlit en francais.
 
 ## Guides de demarrage
 
-- [Demarrage des scrapers](DEMARRAGE_SCRAPERS.md)
-- [Demarrage de l'agent IA](DEMARRAGE_AGENT.md)
+- [Demarrage rapide](QUICK_RUN.md)
+- [Demarrage des scrapers](docs/DEMARRAGE_SCRAPERS.md)
+- [Demarrage de l'agent IA](docs/DEMARRAGE_AGENT.md)
 - [Documentation complete](docs/README.md)
 
 ## Interface Streamlit
@@ -149,7 +150,7 @@ L'interface en francais propose l'estimation, les recommandations, le
 comparateur, les statistiques du marche, la recherche en ligne et le chat avec
 l'agent Mistral.
 
-Documentation : [Recherche immobiliere en ligne](RECHERCHE_EN_LIGNE.md).
+Documentation : [Recherche immobiliere en ligne](docs/RECHERCHE_EN_LIGNE.md).
 
 Le projet utilise un seul fichier `.env`, place a la racine. Les modules de
 `AI-Agent/`, `scraping/`, `ml/` et l'interface partagent cette configuration.
