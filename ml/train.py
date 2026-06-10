@@ -12,7 +12,12 @@ from sklearn.compose import ColumnTransformer, TransformedTargetRegressor
 from sklearn.ensemble import ExtraTreesRegressor, GradientBoostingRegressor, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import Ridge
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.metrics import (
+    mean_absolute_error,
+    mean_absolute_percentage_error,
+    mean_squared_error,
+    r2_score,
+)
 from sklearn.model_selection import KFold, cross_val_score, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -125,6 +130,9 @@ def evaluate(
             "test_mae": round(float(mean_absolute_error(y_test, predictions)), 2),
             "test_rmse": round(float(mean_squared_error(y_test, predictions) ** 0.5), 2),
             "test_r2": round(float(r2_score(y_test, predictions)), 4),
+            "test_mape": round(
+                float(mean_absolute_percentage_error(y_test, predictions) * 100), 2
+            ),
         }
         fitted_models[name] = pipeline
 
@@ -151,6 +159,27 @@ def train(data_path: Path, model_path: Path, report_path: Path) -> dict[str, obj
             "absolute_error_mad": np.round(np.abs(y_test - test_predictions), 0),
         }
     ).sort_values("absolute_error_mad", ascending=False)
+    sample_errors["absolute_percentage_error"] = (
+        sample_errors["absolute_error_mad"] / sample_errors["actual_price_mad"] * 100
+    ).round(2)
+
+    price_bands = pd.cut(
+        sample_errors["actual_price_mad"],
+        bins=[0, 500_000, 1_000_000, 2_000_000, 5_000_000, float("inf")],
+        labels=["< 500K", "500K-1M", "1M-2M", "2M-5M", "> 5M"],
+    )
+    error_by_price_band = (
+        sample_errors.assign(price_band=price_bands)
+        .groupby("price_band", observed=True)
+        .agg(
+            listings=("actual_price_mad", "size"),
+            mae_mad=("absolute_error_mad", "mean"),
+            mape_percent=("absolute_percentage_error", "mean"),
+        )
+        .round(2)
+        .reset_index()
+        .to_dict(orient="records")
+    )
 
     report: dict[str, object] = {
         "trained_at": datetime.now(timezone.utc).isoformat(),
@@ -161,6 +190,7 @@ def train(data_path: Path, model_path: Path, report_path: Path) -> dict[str, obj
         "best_model": best_name,
         "models": results,
         "largest_test_errors": sample_errors.head(10).to_dict(orient="records"),
+        "error_by_price_band": error_by_price_band,
         "model_path": str(model_path),
     }
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -182,6 +212,7 @@ def main() -> None:
     print(f"Test MAE: {metrics['test_mae']:.2f} MAD")
     print(f"Test RMSE: {metrics['test_rmse']:.2f} MAD")
     print(f"Test R2: {metrics['test_r2']:.4f}")
+    print(f"Test MAPE: {metrics['test_mape']:.2f}%")
 
 
 if __name__ == "__main__":

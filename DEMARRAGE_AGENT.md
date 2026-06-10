@@ -3,15 +3,7 @@
 Ce guide explique comment configurer et tester l'agent immobilier utilisant
 Mistral.
 
-## 1. Ouvrir le dossier de l'agent
-
-Depuis la racine du projet :
-
-```powershell
-cd AI-Agent
-```
-
-## 2. Installer `uv`
+## 1. Installer `uv`
 
 Si `uv` n'est pas encore installe :
 
@@ -25,16 +17,20 @@ Verifier l'installation :
 uv --version
 ```
 
-## 3. Installer les dependances
+## 2. Installer toutes les dependances
+
+Depuis la racine `PFA-BI-Ensias`, executer une seule fois :
 
 ```powershell
 uv sync
 ```
 
-Cette commande cree automatiquement l'environnement `.venv` et installe les
-dependances de l'agent.
+Un seul environnement `.venv` est cree a la racine. Il contient les
+dependances des scrapers, du Machine Learning, des tests et de l'agent.
 
-## 4. Creer le fichier `.env`
+Il n'est pas necessaire d'activer manuellement cet environnement.
+
+## 3. Creer le fichier `.env` a la racine
 
 Copier le fichier d'exemple :
 
@@ -49,11 +45,12 @@ MISTRAL_API_KEY=your_real_mistral_api_key
 ```
 
 Ne jamais enregistrer ou pousser le fichier `.env` dans Git.
+Ne pas creer un second `.env` dans `AI-Agent/`.
 
-## 5. Lancer le chat interactif
+## 4. Lancer le chat interactif
 
 ```powershell
-uv run python main.py
+uv run python AI-Agent/main.py
 ```
 
 Exemple de message :
@@ -72,7 +69,7 @@ Commandes disponibles :
 Pour tester l'agent avec un seul message :
 
 ```powershell
-uv run python -c "from agent import RealEstateAgent; print(RealEstateAgent().chat('Bonjour, presente-toi en une phrase.'))"
+uv run python -c "import sys; sys.path.insert(0, 'AI-Agent'); from agent import RealEstateAgent; print(RealEstateAgent().chat('Bonjour, presente-toi en une phrase.'))"
 ```
 
 Le test est reussi si Mistral retourne une reponse en francais sans erreur.
@@ -92,7 +89,7 @@ Cette commande confirme que la cle est chargee sans afficher sa valeur.
 Verifier que :
 
 - le fichier s'appelle exactement `.env` ;
-- il se trouve dans `AI-Agent/` ;
+- il se trouve a la racine `PFA-BI-Ensias/` ;
 - la variable s'appelle exactement `MISTRAL_API_KEY`.
 
 ### `uv` n'est pas reconnu

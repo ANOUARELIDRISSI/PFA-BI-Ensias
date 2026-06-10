@@ -40,6 +40,22 @@ uv run python scraping/scrape_mubawab.py --overwrite
 uv run python scraping/scrape_sarouty.py --overwrite
 ```
 
+Pour collecter les locations :
+
+```powershell
+uv run python scraping/scrape_mubawab.py --transaction rent --overwrite
+uv run python scraping/scrape_sarouty.py --transaction rent --overwrite
+```
+
+Les collecteurs produisent le schema commun defini dans `scraping/schema.py`.
+Il contient notamment la transaction, la ville, le quartier, les coordonnees,
+l'etage, l'etat du bien, l'annee de construction et les equipements. Un champ
+reste vide lorsque la source ne publie pas cette information.
+
+Avant d'ajouter un site, verifier ses conditions d'utilisation, `robots.txt`
+et l'existence d'une API ou de pages publiques stables. Le collecteur doit
+retourner exactement les champs de `scraping.schema.Listing`.
+
 ## Scraper Mubawab
 
 Fichier :

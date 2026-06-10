@@ -3,6 +3,9 @@
 Ce guide explique comment installer et lancer les scrapers apres un nouveau
 clonage du depot.
 
+Le projet utilise uniquement `PFA-BI-Ensias/.env`. Ne creez pas de fichier
+`.env` dans `AI-Agent/`, `scraping/` ou `ml/`.
+
 ## 1. Prerequis
 
 Installer les outils suivants :
@@ -38,7 +41,7 @@ git clone https://github.com/ANOUARELIDRISSI/PFA-BI-Ensias.git
 cd PFA-BI-Ensias
 ```
 
-## 3. Installer les dependances
+## 3. Installer toutes les dependances
 
 Depuis la racine du projet :
 
@@ -46,16 +49,18 @@ Depuis la racine du projet :
 uv sync
 ```
 
-Cette commande cree automatiquement le dossier `.venv` et installe les dependances declarees dans `pyproject.toml`.
+Cette commande cree un seul dossier `.venv` a la racine et installe les
+dependances des scrapers, du Machine Learning, des tests et de l'agent.
 
-Il n'est pas necessaire d'activer manuellement l'environnement pour utiliser `uv run`.
+Il n'est pas necessaire d'activer manuellement l'environnement. `uv` retrouve
+automatiquement le projet racine depuis les sous-dossiers.
 
 ## 4. Lancer le scraper Mubawab
 
 Le scraper collecte par defaut au moins 150 annonces uniques d'appartements a vendre.
 
 ```powershell
-uv run python scraping/scrape_mubawab.py --overwrite
+uv run python scraping/scrape_mubawab.py --transaction sale --overwrite
 ```
 
 Les fichiers produits sont :
@@ -79,7 +84,7 @@ uv run python scraping/scrape_mubawab.py --min-listings 200 --max-pages 15 --del
 ## 5. Lancer le scraper Sarouty
 
 ```powershell
-uv run python scraping/scrape_sarouty.py --overwrite
+uv run python scraping/scrape_sarouty.py --transaction sale --overwrite
 ```
 
 Les fichiers produits sont :
@@ -108,12 +113,32 @@ uv run python scraping/scrape_sarouty.py --overwrite
 
 Chaque source produit son propre fichier CSV et JSON dans `data/raw`.
 
+Pour les locations :
+
+```powershell
+uv run python scraping/scrape_mubawab.py --transaction rent --overwrite
+uv run python scraping/scrape_sarouty.py --transaction rent --overwrite
+```
+
+Les memes scripts peuvent etre lances depuis le dossier `scraping` :
+
+```powershell
+cd scraping
+uv run python scrape_mubawab.py --overwrite
+uv run python scrape_sarouty.py --overwrite
+```
+
+Ces commandes utilisent toujours le `.venv` unique situe a la racine.
+
 ## 7. Structure utile
 
 ```text
 PFA-BI-Ensias/
+|-- .venv/               # Environnement Python unique
+|-- AI-Agent/
 |-- data/
 |   `-- raw/             # Donnees collectees
+|-- ml/
 |-- DEMARRAGE_SCRAPERS.md
 |-- scraping/
 |   |-- scrape_mubawab.py
