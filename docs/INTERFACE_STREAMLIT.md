@@ -7,6 +7,14 @@ uv run streamlit run app.py
 ```
 
 L'interface est en francais et utilise des icones SVG integrees, sans emoji.
+Son design reprend les conventions d'un tableau de bord React moderne :
+
+- en-tete de produit et statut des services ;
+- hero avec indicateurs reels du projet ;
+- navigation compacte par fonctionnalite ;
+- cartes, formulaires et tableaux harmonises ;
+- mise en page responsive pour ordinateur et mobile ;
+- palette, typographie et etats interactifs coherents.
 
 ## Onglets
 

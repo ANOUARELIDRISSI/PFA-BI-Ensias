@@ -19,11 +19,14 @@ if str(AGENT_DIR) not in sys.path:
 
 
 ICONS = {
+    "logo": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V8l9-6 9 6v13h-7v-7h-4v7H3Zm3-3h1v-6h10v6h1V9.7l-6-4-6 4V18Z"/></svg>',
     "building": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V3h11v6h5v12H4Zm3-3h2v-2H7v2Zm0-5h2v-2H7v2Zm0-5h2V6H7v2Zm5 10h2v-2h-2v2Zm0-5h2v-2h-2v2Zm0-5h2V6h-2v2Zm5 10h1v-6h-1v6Z"/></svg>',
     "chart": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16v2H2V3h2v16Zm3-2V9h3v8H7Zm5 0V5h3v12h-3Zm5 0v-6h3v6h-3Z"/></svg>',
     "scale": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H5V2h14v2h-6v3.1l4 2 4-2V9l-3 6h-2l-3-6-1 .5-1-.5-3 6H6L3 9V7.1l4 2 4-2V4Zm-6.4 7L7 13.8 9.4 11H4.6ZM14.6 11l2.4 2.8 2.4-2.8h-4.8ZM11 20v-7h2v7h4v2H7v-2h4Z"/></svg>',
     "search": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20.7 19.3-4.2-4.2a7 7 0 1 0-1.4 1.4l4.2 4.2 1.4-1.4ZM5 11a6 6 0 1 1 12 0 6 6 0 0 1-12 0Z"/></svg>',
     "chat": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-5 4v-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 5v2h12V8H6Zm0 4v2h8v-2H6Z"/></svg>',
+    "database": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.5 2 3 3.8 3 6v12c0 2.2 3.5 4 9 4s9-1.8 9-4V6c0-2.2-3.5-4-9-4Zm0 3c3.7 0 5.7.8 6 1-.3.2-2.3 1-6 1s-5.7-.8-6-1c.3-.2 2.3-1 6-1Zm0 14c-3.9 0-6-1-6-1v-2.7c1.5.7 3.5 1.1 6 1.1s4.5-.4 6-1.1V18s-2.1 1-6 1Zm0-5.6c-3.9 0-6-1-6-1V9.7c1.5.7 3.5 1.1 6 1.1s4.5-.4 6-1.1v2.7s-2.1 1-6 1Z"/></svg>',
+    "pulse": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h4l2-7 4 13 2-6h6v-2h-4.5L13 2 9 15 7.5 11H3v2Z"/></svg>',
 }
 
 
@@ -52,30 +55,133 @@ def inject_css() -> None:
     st.markdown(
         """
         <style>
-        :root { --ink:#14213d; --accent:#1f6f5f; --soft:#eef5f2; --line:#d8e2df; }
-        .stApp { background:#f7f9f8; color:var(--ink); }
-        .block-container { max-width:1200px; padding-top:2rem; }
-        .hero { background:linear-gradient(135deg,#14213d,#1f6f5f); color:white;
-                padding:28px 30px; border-radius:18px; margin-bottom:22px; }
-        .hero h1 { margin:0 0 8px; font-size:2rem; }
-        .hero p { margin:0; opacity:.88; }
-        .section-title { display:flex; align-items:center; gap:10px; margin:10px 0 16px; }
-        .section-title h2 { margin:0; font-size:1.25rem; }
-        .svg-icon { display:inline-flex; width:24px; height:24px; color:#1f6f5f; }
+        :root {
+          --navy:#101b2d; --navy-soft:#18263d; --accent:#0f8a72;
+          --accent-dark:#0b6b59; --accent-soft:#e8f5f1; --canvas:#f4f7f9;
+          --surface:#ffffff; --ink:#172033; --muted:#667085; --line:#e3e8ef;
+          --shadow:0 12px 35px rgba(16,27,45,.08);
+        }
+        html, body, [class*="css"] { font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif; }
+        .stApp { background:var(--canvas); color:var(--ink); }
+        [data-testid="stHeader"] { background:transparent; }
+        [data-testid="stToolbar"] { right:1.25rem; }
+        .block-container { max-width:1380px; padding:1.2rem 2rem 4rem; }
+        .app-bar { display:flex; align-items:center; justify-content:space-between;
+                   padding:10px 4px 24px; }
+        .brand { display:flex; align-items:center; gap:12px; }
+        .brand-mark { display:grid; place-items:center; width:42px; height:42px;
+                      border-radius:12px; color:white; background:var(--navy); }
+        .brand-mark .svg-icon { color:white; width:22px; height:22px; }
+        .brand-name { font-weight:750; letter-spacing:-.02em; color:var(--navy); }
+        .brand-subtitle { color:var(--muted); font-size:.78rem; margin-top:1px; }
+        .status-pill { display:flex; align-items:center; gap:8px; padding:8px 12px;
+                       border:1px solid #cce8df; border-radius:999px;
+                       background:#f3fbf8; color:#166b59; font-size:.8rem; font-weight:650; }
+        .status-dot { width:7px; height:7px; border-radius:50%; background:#18a77f;
+                      box-shadow:0 0 0 4px rgba(24,167,127,.12); }
+        .hero { position:relative; overflow:hidden; display:grid;
+                grid-template-columns:minmax(0,1.5fr) minmax(280px,.7fr); gap:28px;
+                background:linear-gradient(130deg,#101b2d 0%,#172b42 58%,#0f6c61 130%);
+                color:white; padding:38px 40px; border-radius:24px; margin-bottom:22px;
+                box-shadow:0 24px 50px rgba(16,27,45,.18); }
+        .hero:after { content:""; position:absolute; width:360px; height:360px;
+                      right:-150px; top:-210px; border:1px solid rgba(255,255,255,.12);
+                      border-radius:50%; box-shadow:0 0 0 55px rgba(255,255,255,.025),
+                      0 0 0 110px rgba(255,255,255,.02); }
+        .hero-copy, .hero-panel { position:relative; z-index:1; }
+        .eyebrow { color:#8de1cc; font-size:.75rem; font-weight:750;
+                   text-transform:uppercase; letter-spacing:.13em; }
+        .hero h1 { margin:10px 0 12px; font-size:clamp(2rem,4vw,3.25rem);
+                   letter-spacing:-.045em; line-height:1.05; max-width:760px; }
+        .hero p { margin:0; color:#ced8e5; max-width:700px; line-height:1.65; }
+        .hero-panel { align-self:center; display:grid; grid-template-columns:1fr 1fr;
+                      gap:10px; }
+        .hero-stat { padding:15px; border:1px solid rgba(255,255,255,.13);
+                     border-radius:14px; background:rgba(255,255,255,.07);
+                     backdrop-filter:blur(12px); }
+        .hero-stat strong { display:block; font-size:1.15rem; }
+        .hero-stat span { display:block; color:#b8c6d6; font-size:.72rem; margin-top:4px; }
+        .page-intro { display:flex; align-items:flex-start; justify-content:space-between;
+                      gap:20px; margin:8px 0 20px; }
+        .section-title { display:flex; align-items:center; gap:12px; margin:0; }
+        .section-title h2 { margin:0; font-size:1.42rem; letter-spacing:-.025em; color:var(--navy); }
+        .section-description { color:var(--muted); margin:6px 0 0 38px; font-size:.9rem; }
+        .svg-icon { display:inline-flex; width:24px; height:24px; color:var(--accent); }
         .svg-icon svg { width:100%; height:100%; fill:currentColor; }
-        .metric-card { background:white; border:1px solid var(--line); border-radius:14px;
-                       padding:17px; min-height:112px; }
-        .metric-label { color:#5c6b66; font-size:.85rem; }
-        .metric-value { color:var(--ink); font-size:1.35rem; font-weight:700; margin-top:7px; }
-        .result-card { background:white; border:1px solid var(--line); border-radius:14px;
-                       padding:18px; margin:10px 0; }
-        .rank { color:#1f6f5f; font-weight:700; }
-        .small { color:#62716c; font-size:.88rem; }
-        div[data-testid="stMetric"] { background:white; border:1px solid var(--line);
-                                     border-radius:14px; padding:12px; }
-        .stButton > button { border-radius:10px; border:0; background:#1f6f5f; color:white; }
-        .stButton > button:hover { background:#18594d; color:white; }
+        .result-card { background:var(--surface); border:1px solid var(--line);
+                       border-radius:16px; padding:20px 22px; margin:12px 0;
+                       box-shadow:0 5px 18px rgba(16,27,45,.04);
+                       transition:transform .18s ease,box-shadow .18s ease; }
+        .result-card:hover { transform:translateY(-2px); box-shadow:var(--shadow); }
+        .result-card h3 { color:var(--navy); margin:9px 0; letter-spacing:-.015em; }
+        .result-card a { color:var(--accent-dark); font-weight:700; text-decoration:none; }
+        .rank { color:var(--accent-dark); font-size:.77rem; font-weight:750;
+                letter-spacing:.04em; text-transform:uppercase; }
+        .small { color:var(--muted); font-size:.85rem; line-height:1.55; }
+        div[data-testid="stMetric"] { background:var(--surface); border:1px solid var(--line);
+                                     border-radius:16px; padding:17px 18px;
+                                     box-shadow:0 5px 18px rgba(16,27,45,.04); }
+        div[data-testid="stMetricLabel"] { color:var(--muted); }
+        div[data-testid="stMetricValue"] { color:var(--navy); letter-spacing:-.035em; }
+        div[data-testid="stForm"], div[data-testid="stExpander"] {
+          background:var(--surface); border:1px solid var(--line); border-radius:18px;
+          padding:8px 12px; box-shadow:0 5px 18px rgba(16,27,45,.035);
+        }
+        div[data-baseweb="input"] > div, div[data-baseweb="select"] > div,
+        div[data-testid="stNumberInputContainer"] {
+          border-color:#d7dee7 !important; border-radius:10px !important;
+          background:#fbfcfd !important;
+        }
+        .stButton > button, .stFormSubmitButton > button {
+          min-height:42px; border-radius:10px; border:0; padding:0 18px;
+          background:var(--accent); color:white; font-weight:700;
+          box-shadow:0 6px 16px rgba(15,138,114,.2);
+        }
+        .stButton > button:hover, .stFormSubmitButton > button:hover {
+          background:var(--accent-dark); color:white; border:0;
+        }
+        .stTabs [data-baseweb="tab-list"] { gap:5px; padding:6px; border:1px solid var(--line);
+                                           background:white; border-radius:14px;
+                                           box-shadow:0 5px 18px rgba(16,27,45,.035); }
+        .stTabs [data-baseweb="tab"] { height:42px; border-radius:9px; padding:0 16px;
+                                      color:var(--muted); font-weight:650; }
+        .stTabs [aria-selected="true"] { color:var(--navy) !important;
+                                         background:var(--accent-soft) !important; }
+        .stTabs [data-baseweb="tab-highlight"] { display:none; }
+        [data-testid="stDataFrame"] { border:1px solid var(--line); border-radius:14px;
+                                     overflow:hidden; background:white; }
+        [data-testid="stAlert"] { border-radius:12px; }
+        [data-testid="stChatMessage"] { background:white; border:1px solid var(--line);
+                                       border-radius:14px; padding:8px 14px; margin:10px 0; }
+        [data-testid="stChatInput"] { border-color:var(--line); }
+        hr { border-color:var(--line); }
+        @media (max-width:850px) {
+          .block-container { padding:1rem 1rem 3rem; }
+          .hero { grid-template-columns:1fr; padding:28px 24px; border-radius:18px; }
+          .hero-panel { grid-template-columns:repeat(4,1fr); }
+          .app-bar { align-items:flex-start; }
+          .status-pill { display:none; }
+          .stTabs [data-baseweb="tab-list"] { overflow-x:auto; }
+        }
+        @media (max-width:560px) {
+          .hero-panel { grid-template-columns:1fr 1fr; }
+          .hero h1 { font-size:2rem; }
+        }
         </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def page_heading(icon_name: str, title: str, description: str) -> None:
+    st.markdown(
+        f"""
+        <div class="page-intro">
+          <div>
+            <div class="section-title">{icon(icon_name)}<h2>{html.escape(title)}</h2></div>
+            <p class="section-description">{html.escape(description)}</p>
+          </div>
+        </div>
         """,
         unsafe_allow_html=True,
     )
@@ -95,10 +201,7 @@ def property_fields(prefix: str, cities: list[str]) -> PropertyInput:
 
 
 def estimator_page(service: RealEstateService, cities: list[str]) -> None:
-    st.markdown(
-        f'<div class="section-title">{icon("building")}<h2>Estimation de prix</h2></div>',
-        unsafe_allow_html=True,
-    )
+    page_heading("building", "Estimation de prix", "Estimez un bien avec le modele et les annonces comparables.")
     with st.form("estimate_form"):
         item = property_fields("estimate", cities)
         submitted = st.form_submit_button("Calculer l'estimation")
@@ -114,10 +217,7 @@ def estimator_page(service: RealEstateService, cities: list[str]) -> None:
 
 
 def recommendations_page(service: RealEstateService, cities: list[str]) -> None:
-    st.markdown(
-        f'<div class="section-title">{icon("search")}<h2>Recommandations</h2></div>',
-        unsafe_allow_html=True,
-    )
+    page_heading("search", "Recommandations", "Trouvez les annonces les plus adaptees a vos criteres.")
     with st.form("recommend_form"):
         c1, c2 = st.columns(2)
         budget = c1.number_input("Budget maximal MAD", 100_000, 20_000_000, 2_000_000, 50_000)
@@ -140,12 +240,12 @@ def recommendations_page(service: RealEstateService, cities: list[str]) -> None:
             st.markdown(
                 f"""
                 <div class="result-card">
-                  <div class="rank">Rang {item['rank']} · Score {item['recommendation_score']}/100</div>
+                  <div class="rank">Rang {item['rank']} &middot; Score {item['recommendation_score']}/100</div>
                   <h3>{title}</h3>
-                  <p>{money(item['price_mad'])} · {item['surface_m2']:.0f} m2 ·
-                     {item['bedrooms']:.0f} chambres · {money(item['price_per_m2'])}/m2</p>
+                  <p>{money(item['price_mad'])} &middot; {item['surface_m2']:.0f} m2 &middot;
+                     {item['bedrooms']:.0f} chambres &middot; {money(item['price_per_m2'])}/m2</p>
                   <p class="small">{html.escape(item['neighborhood'])}, {html.escape(item['city'])}
-                     · Source {html.escape(item['source'])}</p>
+                     &middot; Source {html.escape(item['source'])}</p>
                   <a href="{link}" target="_blank">Consulter l'annonce</a>
                 </div>
                 """,
@@ -154,10 +254,7 @@ def recommendations_page(service: RealEstateService, cities: list[str]) -> None:
 
 
 def comparison_page(service: RealEstateService, cities: list[str]) -> None:
-    st.markdown(
-        f'<div class="section-title">{icon("scale")}<h2>Comparateur de biens</h2></div>',
-        unsafe_allow_html=True,
-    )
+    page_heading("scale", "Comparateur de biens", "Comparez valeur, budget, completude et localisation.")
     count = st.number_input("Nombre de biens", 2, 5, 2)
     listings = []
     for index in range(int(count)):
@@ -188,18 +285,18 @@ def comparison_page(service: RealEstateService, cities: list[str]) -> None:
                     "completeness_percent",
                 ]
             ],
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
         )
         for item in ranked:
             st.markdown(
                 f"""
                 <div class="result-card">
-                  <div class="rank">Rang {item['rank']} · Score {item['score']}/100</div>
+                  <div class="rank">Rang {item['rank']} &middot; Score {item['score']}/100</div>
                   <h3>{html.escape(item['name'])}</h3>
                   <p>{html.escape(item['explanation'])}</p>
-                  <p class="small">Prix annonce {money(item['advertised_price_mad'])} ·
-                     Estimation {money(item['estimated_price_mad'])} ·
+                  <p class="small">Prix annonce {money(item['advertised_price_mad'])} &middot;
+                     Estimation {money(item['estimated_price_mad'])} &middot;
                      Ecart {item['difference_percent']}%</p>
                 </div>
                 """,
@@ -208,10 +305,7 @@ def comparison_page(service: RealEstateService, cities: list[str]) -> None:
 
 
 def market_page(service: RealEstateService, cities: list[str]) -> None:
-    st.markdown(
-        f'<div class="section-title">{icon("chart")}<h2>Marche observe</h2></div>',
-        unsafe_allow_html=True,
-    )
+    page_heading("chart", "Marche observe", "Explorez les prix et surfaces presents dans les donnees.")
     city = st.selectbox("Ville", cities, key="market_city")
     neighborhood = st.text_input("Quartier facultatif", key="market_neighborhood")
     try:
@@ -233,10 +327,7 @@ def market_page(service: RealEstateService, cities: list[str]) -> None:
 
 
 def model_performance_page() -> None:
-    st.markdown(
-        f'<div class="section-title">{icon("chart")}<h2>Performance du modele</h2></div>',
-        unsafe_allow_html=True,
-    )
+    page_heading("pulse", "Performance du modele", "Consultez les metriques mesurees et les limites actuelles.")
     report_path = ROOT / "reports" / "model_metrics.json"
     if not report_path.exists():
         st.warning("Rapport absent. Lancez `uv run python -m ml.train`.")
@@ -271,7 +362,7 @@ def model_performance_page() -> None:
                     ],
                 }
             )
-            st.dataframe(frame, hide_index=True, use_container_width=True)
+            st.dataframe(frame, hide_index=True, width="stretch")
             st.caption(
                 "Cette conversion illustre la MAPE globale; elle ne constitue pas "
                 "un intervalle de confiance individuel."
@@ -289,12 +380,12 @@ def model_performance_page() -> None:
                 for name, values in report["models"].items()
             ]
         ).sort_values("MAE MAD")
-        st.dataframe(comparison, hide_index=True, use_container_width=True)
+        st.dataframe(comparison, hide_index=True, width="stretch")
 
     st.subheader("Erreurs par tranche de prix")
     bands = report.get("error_by_price_band", [])
     if bands:
-        st.dataframe(pd.DataFrame(bands), hide_index=True, use_container_width=True)
+        st.dataframe(pd.DataFrame(bands), hide_index=True, width="stretch")
     else:
         st.info("Reentrainez le modele pour produire cette analyse.")
 
@@ -313,10 +404,7 @@ def model_performance_page() -> None:
 
 
 def live_search_page(cities: list[str]) -> None:
-    st.markdown(
-        f'<div class="section-title">{icon("search")}<h2>Recherche en ligne</h2></div>',
-        unsafe_allow_html=True,
-    )
+    page_heading("search", "Recherche en ligne", "Recherchez des annonces recentes et verifiez leurs sources.")
     with st.form("live_search_form"):
         c1, c2 = st.columns(2)
         city = c1.selectbox("Ville", cities, key="live_city")
@@ -350,9 +438,9 @@ def live_search_page(cities: list[str]) -> None:
             st.markdown(
                 f"""
                 <div class="result-card">
-                  <div class="rank">{html.escape(item['source'])} · {verification}</div>
+                  <div class="rank">{html.escape(item['source'])} &middot; {verification}</div>
                   <h3>{html.escape(item['title'])}</h3>
-                  <p>{price} · {html.escape(item['location'] or city)}</p>
+                  <p>{price} &middot; {html.escape(item['location'] or city)}</p>
                   <p class="small">{html.escape(item['snippet'][:280])}</p>
                   <a href="{html.escape(item['url'])}" target="_blank">Ouvrir la source</a>
                   <p class="small">Consulte le {html.escape(item['checked_at'])}</p>
@@ -363,10 +451,7 @@ def live_search_page(cities: list[str]) -> None:
 
 
 def chat_page() -> None:
-    st.markdown(
-        f'<div class="section-title">{icon("chat")}<h2>Assistant Mistral</h2></div>',
-        unsafe_allow_html=True,
-    )
+    page_heading("chat", "Assistant Mistral", "Interrogez les donnees avec les outils immobiliers de l'agent.")
     try:
         from agent import RealEstateAgent
         if "agent" not in st.session_state:
@@ -391,19 +476,48 @@ def chat_page() -> None:
 
 
 def main() -> None:
-    st.set_page_config(page_title="Immo Maroc Intelligence", layout="wide")
+    st.set_page_config(
+        page_title="Immo Maroc Intelligence",
+        layout="wide",
+        initial_sidebar_state="collapsed",
+    )
     inject_css()
+    service = get_service()
+    cities = sorted(service.data["city"].dropna().unique().tolist())
+    report_path = ROOT / "reports" / "model_metrics.json"
+    report = json.loads(report_path.read_text(encoding="utf-8")) if report_path.exists() else {}
+    best_model = str(report.get("best_model", "Non entraine")).replace("_", " ").title()
+    dataset_rows = int(report.get("dataset_rows", len(service.data)))
+    source_count = int(service.data["source"].nunique())
     st.markdown(
-        """
+        f"""
+        <div class="app-bar">
+          <div class="brand">
+            <div class="brand-mark">{icon("logo")}</div>
+            <div>
+              <div class="brand-name">Immo Maroc Intelligence</div>
+              <div class="brand-subtitle">Decision immobiliere assistee par les donnees</div>
+            </div>
+          </div>
+          <div class="status-pill"><span class="status-dot"></span>Services operationnels</div>
+        </div>
         <div class="hero">
-          <h1>Immo Maroc Intelligence</h1>
-          <p>Estimation, comparaison, recommandations et analyse du marche immobilier marocain.</p>
+          <div class="hero-copy">
+            <div class="eyebrow">Plateforme immobiliere intelligente</div>
+            <h1>Comprendre le marche. Evaluer avec methode.</h1>
+            <p>Estimation, comparaison, recherche et analyse du marche marocain,
+               reunies dans une experience claire, fiable et professionnelle.</p>
+          </div>
+          <div class="hero-panel">
+            <div class="hero-stat"><strong>{dataset_rows}</strong><span>Annonces ML</span></div>
+            <div class="hero-stat"><strong>{len(cities)}</strong><span>Villes observees</span></div>
+            <div class="hero-stat"><strong>{source_count}</strong><span>Sources locales</span></div>
+            <div class="hero-stat"><strong>{html.escape(best_model)}</strong><span>Meilleur modele</span></div>
+          </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
-    service = get_service()
-    cities = sorted(service.data["city"].dropna().unique().tolist())
     tabs = st.tabs(
         [
             "Estimation",
