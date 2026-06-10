@@ -56,15 +56,33 @@ def clean(raw_dir: Path = RAW_DIR) -> pd.DataFrame:
 
     keep_columns = [
         "source",
+        "source_id",
+        "transaction_type",
         "title",
+        "description",
         "price_mad",
         "location",
+        "city",
+        "neighborhood",
         "property_type",
         "surface_m2",
         "rooms",
         "bedrooms",
         "bathrooms",
+        "floor",
+        "total_floors",
+        "property_condition",
+        "construction_year",
         "furnished",
+        "elevator",
+        "parking",
+        "terrace",
+        "balcony",
+        "security",
+        "latitude",
+        "longitude",
+        "published_at",
+        "scraped_at",
         "url",
     ]
     for column in keep_columns:
@@ -79,8 +97,11 @@ def clean(raw_dir: Path = RAW_DIR) -> pd.DataFrame:
     data["bathrooms"] = _to_numeric(data["bathrooms"])
 
     locations = data["location"].apply(_split_location)
-    data["neighborhood"] = locations.apply(lambda item: item[0])
-    data["city"] = locations.apply(lambda item: item[1])
+    parsed_neighborhood = locations.apply(lambda item: item[0])
+    parsed_city = locations.apply(lambda item: item[1])
+    data["neighborhood"] = data["neighborhood"].fillna(parsed_neighborhood)
+    data["city"] = data["city"].fillna(parsed_city)
+    data["transaction_type"] = data["transaction_type"].fillna("sale")
     data["property_type"] = data["property_type"].fillna("Appartement")
     data["furnished"] = data["furnished"].fillna("UNKNOWN")
 

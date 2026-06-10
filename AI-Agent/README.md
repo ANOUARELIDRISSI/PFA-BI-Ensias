@@ -11,11 +11,10 @@ Toutes les dependances sont gerees par le projet `uv` situe a la racine.
 cd ..
 pip install uv
 uv sync
-cd AI-Agent
 Copy-Item .env.example .env
 ```
 
-Ajouter une cle valide dans `.env` :
+Ajouter une cle valide dans le fichier `.env` de la racine :
 
 ```env
 MISTRAL_API_KEY=your_mistral_api_key_here
@@ -24,10 +23,10 @@ MISTRAL_API_KEY=your_mistral_api_key_here
 ## Lancement
 
 ```powershell
-uv run python main.py
+uv run python AI-Agent/main.py
 ```
 
-`uv` detecte automatiquement le projet racine depuis ce dossier.
+L'agent charge uniquement la configuration de la racine.
 
 Commandes disponibles :
 
@@ -37,5 +36,5 @@ Commandes disponibles :
 ## Test rapide
 
 ```powershell
-uv run python -c "from agent import RealEstateAgent; print(RealEstateAgent().chat('Presente-toi en une phrase.'))"
+uv run python AI-Agent/main.py
 ```

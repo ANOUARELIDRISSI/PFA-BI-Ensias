@@ -5,7 +5,6 @@ import csv
 import json
 import re
 import time
-from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
@@ -14,31 +13,17 @@ from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup, Tag
 
+try:
+    from scraping.schema import FIELDS, Listing
+except ModuleNotFoundError:
+    from schema import FIELDS, Listing
 
 BASE_URL = "https://www.mubawab.ma"
-START_URL = f"{BASE_URL}/en/sc/apartments-for-sale"
 OUTPUT_DIR = Path("data/raw")
 USER_AGENT = (
     "Mozilla/5.0 (compatible; PFA-BI-Ensias/0.1; "
     "+https://github.com/ANOUARELIDRISSI/PFA-BI-Ensias)"
 )
-
-
-@dataclass
-class Listing:
-    source: str
-    scraped_at: str
-    page: int
-    title: str | None
-    price: str | None
-    price_mad: int | None
-    location: str | None
-    surface_m2: int | None
-    rooms: int | None
-    bedrooms: int | None
-    bathrooms: int | None
-    description: str | None
-    url: str | None
 
 
 def clean_text(value: str | None) -> str | None:
@@ -58,10 +43,12 @@ def parse_int(value: str | None) -> int | None:
     return int(digits) if digits else None
 
 
-def page_url(page: int) -> str:
+def page_url(page: int, transaction: str = "sale") -> str:
+    slug = "apartments-for-rent" if transaction == "rent" else "apartments-for-sale"
+    start_url = f"{BASE_URL}/en/sc/{slug}"
     if page <= 1:
-        return START_URL
-    return f"{START_URL}:p:{page}"
+        return start_url
+    return f"{start_url}:p:{page}"
 
 
 def fetch_page(url: str) -> str:
@@ -126,7 +113,9 @@ def parse_features(card: Tag, full_text: str) -> tuple[int | None, int | None, i
     return surface, rooms, bedrooms, bathrooms
 
 
-def parse_listing(card: Tag, page: int, scraped_at: str) -> Listing | None:
+def parse_listing(
+    card: Tag, page: int, scraped_at: str, transaction: str = "sale"
+) -> Listing | None:
     full_text = clean_text(card.get_text(" ", strip=True)) or ""
     title = first_text(card, ("h2.listingTit", "h2", "a[title]"))
     price = first_text(card, ("span.priceTag", "span[class*='price']", ".priceTag"))
@@ -140,31 +129,58 @@ def parse_listing(card: Tag, page: int, scraped_at: str) -> Listing | None:
 
     return Listing(
         source="mubawab",
+        source_id=url,
         scraped_at=scraped_at,
+        published_at=None,
         page=page,
+        transaction_type=transaction,
+        property_type="Appartement",
         title=title,
+        description=description,
         price=price,
         price_mad=parse_int(price),
         location=location,
+        city=None,
+        neighborhood=None,
+        latitude=None,
+        longitude=None,
         surface_m2=surface,
         rooms=rooms,
         bedrooms=bedrooms,
         bathrooms=bathrooms,
-        description=description,
+        floor=None,
+        total_floors=None,
+        property_condition=None,
+        construction_year=None,
+        furnished=None,
+        elevator=None,
+        parking=None,
+        terrace=None,
+        balcony=None,
+        security=None,
         url=url,
     )
 
 
-def scrape(max_pages: int, delay: float, min_listings: int = 0) -> list[Listing]:
+def scrape(
+    max_pages: int,
+    delay: float,
+    min_listings: int = 0,
+    transaction: str = "sale",
+) -> list[Listing]:
     scraped_at = datetime.now(timezone.utc).isoformat()
     listings: list[Listing] = []
 
     for page in range(1, max_pages + 1):
-        url = page_url(page)
+        url = page_url(page, transaction)
         print(f"Scraping page {page}: {url}")
         soup = BeautifulSoup(fetch_page(url), "html.parser")
         cards = find_listing_cards(soup)
-        page_listings = [listing for card in cards if (listing := parse_listing(card, page, scraped_at))]
+        page_listings = [
+            listing
+            for card in cards
+            if (listing := parse_listing(card, page, scraped_at, transaction))
+        ]
         listings.extend(page_listings)
         print(f"  Found {len(page_listings)} listings")
 
@@ -179,19 +195,24 @@ def scrape(max_pages: int, delay: float, min_listings: int = 0) -> list[Listing]
     return list(unique_listings.values())
 
 
-def save_outputs(listings: list[Listing], output_dir: Path = OUTPUT_DIR, overwrite: bool = False) -> tuple[Path, Path]:
+def save_outputs(
+    listings: list[Listing],
+    output_dir: Path = OUTPUT_DIR,
+    overwrite: bool = False,
+    transaction: str = "sale",
+) -> tuple[Path, Path]:
     output_dir.mkdir(parents=True, exist_ok=True)
     if overwrite:
-        csv_path = output_dir / "mubawab_apartments_sale.csv"
-        json_path = output_dir / "mubawab_apartments_sale.json"
+        csv_path = output_dir / f"mubawab_apartments_{transaction}.csv"
+        json_path = output_dir / f"mubawab_apartments_{transaction}.json"
     else:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        csv_path = output_dir / f"mubawab_apartments_sale_{timestamp}.csv"
-        json_path = output_dir / f"mubawab_apartments_sale_{timestamp}.json"
-    rows = [asdict(listing) for listing in listings]
+        csv_path = output_dir / f"mubawab_apartments_{transaction}_{timestamp}.csv"
+        json_path = output_dir / f"mubawab_apartments_{transaction}_{timestamp}.json"
+    rows = [listing.to_dict() for listing in listings]
 
     with csv_path.open("w", encoding="utf-8", newline="") as file:
-        writer = csv.DictWriter(file, fieldnames=list(Listing.__dataclass_fields__.keys()))
+        writer = csv.DictWriter(file, fieldnames=FIELDS)
         writer.writeheader()
         writer.writerows(rows)
 
@@ -206,16 +227,24 @@ def main() -> None:
     parser.add_argument("--max-pages", type=int, default=10, help="Maximum number of listing pages to scrape.")
     parser.add_argument("--min-listings", type=int, default=150, help="Minimum number of unique listings to collect.")
     parser.add_argument("--delay", type=float, default=2.0, help="Delay between page requests in seconds.")
+    parser.add_argument("--transaction", choices=["sale", "rent"], default="sale")
     parser.add_argument("--overwrite", action="store_true", help="Write stable filenames instead of timestamped files.")
     args = parser.parse_args()
 
-    listings = scrape(max_pages=args.max_pages, delay=args.delay, min_listings=args.min_listings)
+    listings = scrape(
+        max_pages=args.max_pages,
+        delay=args.delay,
+        min_listings=args.min_listings,
+        transaction=args.transaction,
+    )
     if len(listings) < args.min_listings:
         raise RuntimeError(
             f"Only {len(listings)} unique listings were collected; "
             f"the requested minimum is {args.min_listings}."
         )
-    csv_path, json_path = save_outputs(listings, overwrite=args.overwrite)
+    csv_path, json_path = save_outputs(
+        listings, overwrite=args.overwrite, transaction=args.transaction
+    )
     print(f"Saved {len(listings)} listings to {csv_path} and {json_path}")
 
 

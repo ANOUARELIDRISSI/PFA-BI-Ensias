@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import json
 import sys
 from pathlib import Path
 
@@ -32,6 +33,14 @@ def icon(name: str) -> str:
 
 def money(value: float) -> str:
     return f"{value:,.0f} MAD".replace(",", " ")
+
+
+def compact_money(value: float) -> str:
+    if abs(value) >= 1_000_000:
+        return f"{value / 1_000_000:.2f}M"
+    if abs(value) >= 1_000:
+        return f"{value / 1_000:.0f}K"
+    return f"{value:.0f}"
 
 
 @st.cache_resource
@@ -223,6 +232,86 @@ def market_page(service: RealEstateService, cities: list[str]) -> None:
     st.bar_chart(local.groupby("neighborhood")["price_mad"].median().nlargest(12))
 
 
+def model_performance_page() -> None:
+    st.markdown(
+        f'<div class="section-title">{icon("chart")}<h2>Performance du modele</h2></div>',
+        unsafe_allow_html=True,
+    )
+    report_path = ROOT / "reports" / "model_metrics.json"
+    if not report_path.exists():
+        st.warning("Rapport absent. Lancez `uv run python -m ml.train`.")
+        return
+
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    best_name = report["best_model"]
+    metrics = report["models"][best_name]
+    mape = metrics.get("test_mape")
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("R2", f"{metrics['test_r2']:.3f}")
+    c2.metric("MAE", f"{compact_money(metrics['test_mae'])} MAD")
+    c3.metric("RMSE", f"{compact_money(metrics['test_rmse'])} MAD")
+    c4.metric("MAPE", f"{mape:.1f}%" if mape is not None else "A recalculer")
+    st.caption(
+        f"Modele selectionne : {best_name} | "
+        f"{report['dataset_rows']} annonces | jeu de test separe."
+    )
+
+    left, right = st.columns(2)
+    with left:
+        st.subheader("Interpretation de la MAPE")
+        if mape is None:
+            st.info("Reentrainez le modele pour calculer cette metrique.")
+        else:
+            examples = [300_000, 800_000, 1_500_000, 5_000_000, 8_000_000]
+            frame = pd.DataFrame(
+                {
+                    "Prix du bien": [money(value) for value in examples],
+                    "Erreur moyenne indicative": [
+                        f"+/- {money(value * mape / 100)}" for value in examples
+                    ],
+                }
+            )
+            st.dataframe(frame, hide_index=True, use_container_width=True)
+            st.caption(
+                "Cette conversion illustre la MAPE globale; elle ne constitue pas "
+                "un intervalle de confiance individuel."
+            )
+    with right:
+        st.subheader("Comparaison des modeles")
+        comparison = pd.DataFrame(
+            [
+                {
+                    "Modele": name,
+                    "R2": values["test_r2"],
+                    "MAE MAD": values["test_mae"],
+                    "MAPE %": values.get("test_mape"),
+                }
+                for name, values in report["models"].items()
+            ]
+        ).sort_values("MAE MAD")
+        st.dataframe(comparison, hide_index=True, use_container_width=True)
+
+    st.subheader("Erreurs par tranche de prix")
+    bands = report.get("error_by_price_band", [])
+    if bands:
+        st.dataframe(pd.DataFrame(bands), hide_index=True, use_container_width=True)
+    else:
+        st.info("Reentrainez le modele pour produire cette analyse.")
+
+    st.subheader("Donnees a collecter pour progresser")
+    st.markdown(
+        """
+        - Quartier normalise et coordonnees geographiques
+        - Etat du bien, etage, ascenseur et parking
+        - Annee de construction et qualite des finitions
+        - Date de publication et historique des changements de prix
+
+        Les gains de performance doivent etre mesures par validation croisee.
+        Ils ne sont pas affiches comme acquis avant une nouvelle evaluation.
+        """
+    )
+
+
 def live_search_page(cities: list[str]) -> None:
     st.markdown(
         f'<div class="section-title">{icon("search")}<h2>Recherche en ligne</h2></div>',
@@ -321,6 +410,7 @@ def main() -> None:
             "Recommandations",
             "Comparateur",
             "Marche",
+            "Modele ML",
             "Recherche en ligne",
             "Agent IA",
         ]
@@ -334,8 +424,10 @@ def main() -> None:
     with tabs[3]:
         market_page(service, cities)
     with tabs[4]:
-        live_search_page(cities)
+        model_performance_page()
     with tabs[5]:
+        live_search_page(cities)
+    with tabs[6]:
         chat_page()
 
 

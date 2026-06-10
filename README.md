@@ -147,3 +147,6 @@ comparateur, les statistiques du marche, la recherche en ligne et le chat avec
 l'agent Mistral.
 
 Documentation : [Recherche immobiliere en ligne](RECHERCHE_EN_LIGNE.md).
+
+Le projet utilise un seul fichier `.env`, place a la racine. Les modules de
+`AI-Agent/`, `scraping/`, `ml/` et l'interface partagent cette configuration.

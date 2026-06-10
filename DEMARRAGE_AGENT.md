@@ -30,16 +30,7 @@ dependances des scrapers, du Machine Learning, des tests et de l'agent.
 
 Il n'est pas necessaire d'activer manuellement cet environnement.
 
-## 3. Ouvrir le dossier de l'agent
-
-```powershell
-cd AI-Agent
-```
-
-Les commandes `uv run` executees dans ce dossier utilisent automatiquement le
-`pyproject.toml`, le `uv.lock` et le `.venv` situes a la racine.
-
-## 4. Creer le fichier `.env`
+## 3. Creer le fichier `.env` a la racine
 
 Copier le fichier d'exemple :
 
@@ -54,14 +45,9 @@ MISTRAL_API_KEY=your_real_mistral_api_key
 ```
 
 Ne jamais enregistrer ou pousser le fichier `.env` dans Git.
+Ne pas creer un second `.env` dans `AI-Agent/`.
 
-## 5. Lancer le chat interactif
-
-```powershell
-uv run python main.py
-```
-
-Il est egalement possible de lancer l'agent depuis la racine :
+## 4. Lancer le chat interactif
 
 ```powershell
 uv run python AI-Agent/main.py

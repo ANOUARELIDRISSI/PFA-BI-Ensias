@@ -3,6 +3,9 @@
 Ce guide explique comment installer et lancer les scrapers apres un nouveau
 clonage du depot.
 
+Le projet utilise uniquement `PFA-BI-Ensias/.env`. Ne creez pas de fichier
+`.env` dans `AI-Agent/`, `scraping/` ou `ml/`.
+
 ## 1. Prerequis
 
 Installer les outils suivants :
@@ -57,7 +60,7 @@ automatiquement le projet racine depuis les sous-dossiers.
 Le scraper collecte par defaut au moins 150 annonces uniques d'appartements a vendre.
 
 ```powershell
-uv run python scraping/scrape_mubawab.py --overwrite
+uv run python scraping/scrape_mubawab.py --transaction sale --overwrite
 ```
 
 Les fichiers produits sont :
@@ -81,7 +84,7 @@ uv run python scraping/scrape_mubawab.py --min-listings 200 --max-pages 15 --del
 ## 5. Lancer le scraper Sarouty
 
 ```powershell
-uv run python scraping/scrape_sarouty.py --overwrite
+uv run python scraping/scrape_sarouty.py --transaction sale --overwrite
 ```
 
 Les fichiers produits sont :
@@ -109,6 +112,13 @@ uv run python scraping/scrape_sarouty.py --overwrite
 ```
 
 Chaque source produit son propre fichier CSV et JSON dans `data/raw`.
+
+Pour les locations :
+
+```powershell
+uv run python scraping/scrape_mubawab.py --transaction rent --overwrite
+uv run python scraping/scrape_sarouty.py --transaction rent --overwrite
+```
 
 Les memes scripts peuvent etre lances depuis le dossier `scraping` :
 
