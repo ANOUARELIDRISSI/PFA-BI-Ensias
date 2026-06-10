@@ -10,7 +10,7 @@ racine par `config.py`.
 
 ## Outils disponibles
 
-L'agent dispose de sept outils dans `AI-Agent/tools.py` :
+L'agent dispose de huit outils dans `AI-Agent/tools.py` :
 
 1. `predict_property_price`
 2. `find_comparable_properties`
@@ -19,6 +19,11 @@ L'agent dispose de sept outils dans `AI-Agent/tools.py` :
 5. `compare_properties`
 6. `recommend_properties`
 7. `search_live_properties`
+8. `run_property_scraper`
+
+Le dernier outil lance uniquement les collecteurs autorises Mubawab et
+Sarouty. Il accepte la vente ou la location, limite le volume demande et
+retourne le code de sortie, les chemins des fichiers et les journaux.
 
 Le prompt impose l'utilisation des outils pour les chiffres immobiliers. Le
 modele ne doit pas inventer un prix, une annonce ou une statistique.
@@ -37,8 +42,10 @@ Commandes interactives :
 ## Verification reelle
 
 Une requete reelle a l'API Mistral a ete executee avec succes depuis le `.env`
-de la racine. Les tests automatises des outils utilisent des doubles pour ne
-pas consommer le quota API a chaque execution.
+de la racine. Un test reel a aussi demande a Mistral de lancer Sarouty pour les
+locations : l'agent a selectionne l'outil, execute le scraper et rapporte 100
+annonces collectees. Les tests automatises utilisent des doubles pour ne pas
+consommer le quota API a chaque execution.
 
 ## Comportement attendu
 

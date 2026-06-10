@@ -10,6 +10,7 @@ import streamlit as st
 
 from real_estate.services import ListingInput, PropertyInput, RealEstateService
 from real_estate.web_search import search_properties
+from scraping.runner import run_scraper
 
 
 ROOT = Path(__file__).resolve().parent
@@ -450,6 +451,63 @@ def live_search_page(cities: list[str]) -> None:
             )
 
 
+def collection_page() -> None:
+    page_heading(
+        "database",
+        "Collecte des donnees",
+        "Lancez les collecteurs approuves et suivez leur execution depuis l'interface.",
+    )
+    st.info(
+        "La collecte remplace les fichiers stables de la source choisie. "
+        "Les exports restent locaux et ignores par Git."
+    )
+    with st.form("scraper_form"):
+        c1, c2 = st.columns(2)
+        source_label = c1.selectbox("Source", ["Mubawab", "Sarouty"])
+        transaction_label = c2.selectbox("Transaction", ["Vente", "Location"])
+        c3, c4 = st.columns(2)
+        min_listings = c3.number_input(
+            "Nombre minimum d'annonces", min_value=1, max_value=1_000, value=150
+        )
+        max_pages = c4.number_input(
+            "Nombre maximal de pages Mubawab", min_value=1, max_value=100, value=20
+        )
+        submitted = st.form_submit_button("Lancer la collecte")
+
+    if submitted:
+        source = source_label.lower()
+        transaction = "rent" if transaction_label == "Location" else "sale"
+        with st.spinner(
+            f"Collecte {source_label} en cours. Cette operation peut durer plusieurs minutes."
+        ):
+            try:
+                result = run_scraper(
+                    source=source,
+                    transaction=transaction,
+                    min_listings=int(min_listings),
+                    max_pages=int(max_pages),
+                )
+            except Exception as error:
+                st.error(f"Execution impossible : {error}")
+                return
+
+        if result["success"]:
+            st.success(f"Collecte {source_label} terminee avec succes.")
+            c1, c2, c3 = st.columns(3)
+            c1.metric("Source", source_label)
+            c2.metric("Transaction", transaction_label)
+            c3.metric("Code de sortie", result["return_code"])
+            st.code(result["csv_path"], language=None)
+        else:
+            st.error(
+                f"La collecte a echoue avec le code {result['return_code']}."
+            )
+        with st.expander("Journal d'execution", expanded=not result["success"]):
+            st.code(result["stdout"] or "Aucune sortie standard.", language=None)
+            if result["stderr"]:
+                st.code(result["stderr"], language=None)
+
+
 def chat_page() -> None:
     page_heading("chat", "Assistant Mistral", "Interrogez les donnees avec les outils immobiliers de l'agent.")
     try:
@@ -525,6 +583,7 @@ def main() -> None:
             "Comparateur",
             "Marche",
             "Modele ML",
+            "Collecte",
             "Recherche en ligne",
             "Agent IA",
         ]
@@ -540,8 +599,10 @@ def main() -> None:
     with tabs[4]:
         model_performance_page()
     with tabs[5]:
-        live_search_page(cities)
+        collection_page()
     with tabs[6]:
+        live_search_page(cities)
+    with tabs[7]:
         chat_page()
 
 

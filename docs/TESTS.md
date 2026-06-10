@@ -36,6 +36,7 @@ uv run python -m py_compile `
 - collecte de 200 locations uniques sur Sarouty ;
 - entrainement du modele sur 317 ventes nettoyees ;
 - requete reelle a Mistral avec le `.env` racine ;
+- execution reelle du scraper Sarouty par le runner et par un appel Mistral ;
 - recherche DuckDuckGo reelle vers Mubawab et Sarouty ;
 - rendu des sept onglets Streamlit sans exception.
 

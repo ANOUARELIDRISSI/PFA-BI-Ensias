@@ -48,6 +48,19 @@ Lit `reports/model_metrics.json` et affiche :
 - erreurs par tranche de prix ;
 - donnees prioritaires a collecter.
 
+### Collecte
+
+Lance les scrapers Mubawab ou Sarouty directement depuis l'interface :
+
+- choix de la vente ou de la location ;
+- objectif de nombre d'annonces ;
+- limite de pages pour Mubawab ;
+- affichage du succes, du code de sortie et du fichier produit ;
+- journal d'execution consultable.
+
+L'interface utilise une liste stricte de scripts autorises et ne permet pas
+d'executer une commande systeme libre.
+
 ### Recherche en ligne
 
 Recherche des annonces recentes de vente ou location sur les domaines

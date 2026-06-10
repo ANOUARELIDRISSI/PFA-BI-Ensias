@@ -17,6 +17,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from real_estate.services import ListingInput, PropertyInput, RealEstateService
 from real_estate.web_search import search_properties
+from scraping.runner import run_scraper
 
 
 @lru_cache(maxsize=1)
@@ -194,6 +195,24 @@ def search_live_properties(
     )
 
 
+@tool
+def run_property_scraper(
+    source: str,
+    transaction: str = "sale",
+    min_listings: int = 150,
+    max_pages: int = 20,
+) -> str:
+    """Lancer un scraper autorise: mubawab ou sarouty, vente ou location."""
+    return _json(
+        run_scraper(
+            source=source,
+            transaction=transaction,
+            min_listings=min_listings,
+            max_pages=max_pages,
+        )
+    )
+
+
 REAL_ESTATE_TOOLS = [
     predict_property_price,
     find_comparable_properties,
@@ -202,4 +221,5 @@ REAL_ESTATE_TOOLS = [
     compare_properties,
     recommend_properties,
     search_live_properties,
+    run_property_scraper,
 ]

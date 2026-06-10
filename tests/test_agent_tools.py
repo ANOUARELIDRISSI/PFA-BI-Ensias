@@ -19,6 +19,7 @@ from tools import (
     get_market_summary,
     predict_property_price,
     recommend_properties,
+    run_property_scraper,
     search_live_properties,
 )
 
@@ -126,3 +127,16 @@ def test_live_search_tool(monkeypatch: pytest.MonkeyPatch) -> None:
     )
     assert result[0]["verified"] is True
     assert result[0]["source"] == "Mubawab"
+
+
+def test_scraper_tool(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        "tools.run_scraper",
+        lambda **kwargs: {"success": True, "source": kwargs["source"]},
+    )
+    result = json.loads(
+        run_property_scraper.invoke(
+            {"source": "mubawab", "transaction": "rent", "min_listings": 5}
+        )
+    )
+    assert result == {"success": True, "source": "mubawab"}
