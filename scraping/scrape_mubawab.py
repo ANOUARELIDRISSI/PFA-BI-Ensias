@@ -43,6 +43,15 @@ def parse_int(value: str | None) -> int | None:
     return int(digits) if digits else None
 
 
+def parse_location(value: str | None) -> tuple[str | None, str | None]:
+    if not value:
+        return None, None
+    parts = [part.strip() for part in value.split(",") if part.strip()]
+    if len(parts) >= 2:
+        return parts[0], parts[-1]
+    return None, parts[0] if parts else None
+
+
 def page_url(page: int, transaction: str = "sale") -> str:
     slug = "apartments-for-rent" if transaction == "rent" else "apartments-for-sale"
     start_url = f"{BASE_URL}/en/sc/{slug}"
@@ -123,6 +132,7 @@ def parse_listing(
     description = first_text(card, (".listingP", "p[class*='description']", "p"))
     url = first_link(card)
     surface, rooms, bedrooms, bathrooms = parse_features(card, full_text)
+    neighborhood, city = parse_location(location)
 
     if not any([title, price, location, url]):
         return None
@@ -140,8 +150,8 @@ def parse_listing(
         price=price,
         price_mad=parse_int(price),
         location=location,
-        city=None,
-        neighborhood=None,
+        city=city,
+        neighborhood=neighborhood,
         latitude=None,
         longitude=None,
         surface_m2=surface,
