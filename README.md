@@ -133,3 +133,14 @@ Le projet est actuellement en phase d'initialisation et de conception.
 
 - [Demarrage des scrapers](DEMARRAGE_SCRAPERS.md)
 - [Demarrage de l'agent IA](DEMARRAGE_AGENT.md)
+
+## Interface Streamlit
+
+Apres `uv sync`, lancer depuis la racine :
+
+```powershell
+uv run streamlit run app.py
+```
+
+L'interface en francais propose l'estimation, les recommandations, le
+comparateur, les statistiques du marche et le chat avec l'agent Mistral.

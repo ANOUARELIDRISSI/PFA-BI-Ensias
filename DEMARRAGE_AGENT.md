@@ -3,15 +3,7 @@
 Ce guide explique comment configurer et tester l'agent immobilier utilisant
 Mistral.
 
-## 1. Ouvrir le dossier de l'agent
-
-Depuis la racine du projet :
-
-```powershell
-cd AI-Agent
-```
-
-## 2. Installer `uv`
+## 1. Installer `uv`
 
 Si `uv` n'est pas encore installe :
 
@@ -25,14 +17,27 @@ Verifier l'installation :
 uv --version
 ```
 
-## 3. Installer les dependances
+## 2. Installer toutes les dependances
+
+Depuis la racine `PFA-BI-Ensias`, executer une seule fois :
 
 ```powershell
 uv sync
 ```
 
-Cette commande cree automatiquement l'environnement `.venv` et installe les
-dependances de l'agent.
+Un seul environnement `.venv` est cree a la racine. Il contient les
+dependances des scrapers, du Machine Learning, des tests et de l'agent.
+
+Il n'est pas necessaire d'activer manuellement cet environnement.
+
+## 3. Ouvrir le dossier de l'agent
+
+```powershell
+cd AI-Agent
+```
+
+Les commandes `uv run` executees dans ce dossier utilisent automatiquement le
+`pyproject.toml`, le `uv.lock` et le `.venv` situes a la racine.
 
 ## 4. Creer le fichier `.env`
 
@@ -54,6 +59,12 @@ Ne jamais enregistrer ou pousser le fichier `.env` dans Git.
 
 ```powershell
 uv run python main.py
+```
+
+Il est egalement possible de lancer l'agent depuis la racine :
+
+```powershell
+uv run python AI-Agent/main.py
 ```
 
 Exemple de message :

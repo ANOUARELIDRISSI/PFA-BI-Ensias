@@ -5,9 +5,13 @@ marocain.
 
 ## Installation
 
+Toutes les dependances sont gerees par le projet `uv` situe a la racine.
+
 ```powershell
+cd ..
 pip install uv
 uv sync
+cd AI-Agent
 Copy-Item .env.example .env
 ```
 
@@ -22,6 +26,8 @@ MISTRAL_API_KEY=your_mistral_api_key_here
 ```powershell
 uv run python main.py
 ```
+
+`uv` detecte automatiquement le projet racine depuis ce dossier.
 
 Commandes disponibles :
 

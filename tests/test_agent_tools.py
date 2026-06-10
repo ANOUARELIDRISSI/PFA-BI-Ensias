@@ -1,0 +1,103 @@
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+import pytest
+from langchain_core.messages import AIMessage
+
+
+AGENT_DIR = Path(__file__).resolve().parents[1] / "AI-Agent"
+sys.path.insert(0, str(AGENT_DIR))
+
+import agent as agent_module
+from tools import (
+    compare_properties,
+    detect_listing_price_anomaly,
+    find_comparable_properties,
+    get_market_summary,
+    predict_property_price,
+    recommend_properties,
+)
+
+
+PROPERTY = {
+    "surface_m2": 100,
+    "rooms": 3,
+    "bedrooms": 2,
+    "bathrooms": 2,
+    "city": "Casablanca",
+    "neighborhood": "Maarif",
+    "furnished": "NO",
+}
+
+
+def test_all_tool_outputs() -> None:
+    prediction = json.loads(predict_property_price.invoke(PROPERTY))
+    comparables = json.loads(find_comparable_properties.invoke({**PROPERTY, "limit": 3}))
+    anomaly = json.loads(
+        detect_listing_price_anomaly.invoke({**PROPERTY, "advertised_price_mad": 5_000_000})
+    )
+    summary = json.loads(get_market_summary.invoke({"city": "Casablanca"}))
+    comparison = json.loads(
+        compare_properties.invoke(
+            {
+                "listings_json": json.dumps(
+                    [
+                        {"name": "A", "advertised_price_mad": 1_500_000, **PROPERTY},
+                        {"name": "B", "advertised_price_mad": 3_000_000, **PROPERTY},
+                    ]
+                ),
+                "budget_mad": 2_000_000,
+                "preferred_city": "Casablanca",
+            }
+        )
+    )
+    recommendations = json.loads(
+        recommend_properties.invoke(
+            {"budget_mad": 2_000_000, "city": "Casablanca", "limit": 3}
+        )
+    )
+    assert prediction["estimated_price_mad"] > 0
+    assert len(comparables) == 3 and all(item["url"] for item in comparables)
+    assert anomaly["classification"]
+    assert summary["listing_count"] > 0
+    assert comparison[0]["rank"] == 1
+    assert len(recommendations) == 3
+
+
+class FakeBoundModel:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def invoke(self, messages: list[object]) -> AIMessage:
+        self.calls += 1
+        if self.calls == 1:
+            return AIMessage(
+                content="",
+                tool_calls=[
+                    {
+                        "name": "get_market_summary",
+                        "args": {"city": "Casablanca"},
+                        "id": "call-1",
+                    }
+                ],
+            )
+        assert any(getattr(message, "tool_call_id", None) == "call-1" for message in messages)
+        return AIMessage(content="Analyse Casablanca terminee.")
+
+
+class FakeMistral:
+    def __init__(self, **_: object) -> None:
+        self.bound = FakeBoundModel()
+
+    def bind_tools(self, _: list[object]) -> FakeBoundModel:
+        return self.bound
+
+
+def test_agent_tool_loop(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MISTRAL_API_KEY", "test-key")
+    monkeypatch.setattr(agent_module, "ChatMistralAI", FakeMistral)
+    result = agent_module.RealEstateAgent().chat("Resume Casablanca.")
+    assert "Casablanca" in result
