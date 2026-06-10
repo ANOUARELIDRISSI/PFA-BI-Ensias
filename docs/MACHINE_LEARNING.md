@@ -50,15 +50,13 @@ Le meilleur modele est choisi avec la MAE moyenne en validation croisee.
 
 ## Metriques actuelles
 
-Le dernier entrainement utilise 317 annonces :
+Les valeurs courantes sont enregistrees dans `reports/model_metrics.json` et
+affichees dans les onglets `Modele ML` et `Insights`. Elles changent apres
+chaque nouvelle collecte et chaque entrainement.
 
-| Metrique | Valeur |
-|---|---:|
-| Meilleur modele | Extra Trees |
-| R2 | 0,610 |
-| MAE | 399 325 MAD |
-| RMSE | 578 580 MAD |
-| MAPE | 33,58 % |
+Le dernier cycle reel verifie a nettoye 402 ventes et a selectionne Extra Trees
+avec un R2 de 0,6499. Les autres metriques doivent etre lues directement dans
+le rapport, car une amelioration du R2 peut coexister avec une MAPE plus elevee.
 
 Ces valeurs sont mesurees sur le jeu de test. Elles ne doivent pas etre
 remplacees par les valeurs d'une maquette visuelle.

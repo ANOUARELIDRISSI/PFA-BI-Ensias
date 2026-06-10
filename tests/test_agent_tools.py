@@ -13,14 +13,17 @@ sys.path.insert(0, str(AGENT_DIR))
 
 import agent as agent_module
 from tools import (
+    clean_real_estate_data,
     compare_properties,
     detect_listing_price_anomaly,
     find_comparable_properties,
     get_market_summary,
+    get_model_performance,
     predict_property_price,
     recommend_properties,
     run_property_scraper,
     search_live_properties,
+    train_sale_price_model,
 )
 
 
@@ -140,3 +143,22 @@ def test_scraper_tool(monkeypatch: pytest.MonkeyPatch) -> None:
         )
     )
     assert result == {"success": True, "source": "mubawab"}
+
+
+def test_ml_orchestration_tools(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        "tools.clean_dataset",
+        lambda: {"success": True, "rows": 10},
+    )
+    monkeypatch.setattr(
+        "tools.train_price_model",
+        lambda: {"success": True, "best_model": "extra_trees"},
+    )
+    monkeypatch.setattr(
+        "tools.read_model_performance",
+        lambda: {"best_model": "extra_trees", "dataset_rows": 10},
+    )
+    assert json.loads(clean_real_estate_data.invoke({}))["rows"] == 10
+    assert json.loads(train_sale_price_model.invoke({}))["best_model"] == "extra_trees"
+    assert json.loads(get_model_performance.invoke({}))["dataset_rows"] == 10
+    get_model_performance,

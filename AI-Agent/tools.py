@@ -17,6 +17,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from real_estate.services import ListingInput, PropertyInput, RealEstateService
 from real_estate.web_search import search_properties
+from ml.runner import clean_dataset, read_model_performance, train_price_model
 from scraping.runner import run_scraper
 
 
@@ -213,6 +214,28 @@ def run_property_scraper(
     )
 
 
+@tool
+def clean_real_estate_data() -> str:
+    """Nettoyer et normaliser les donnees brutes de vente collectees."""
+    result = clean_dataset()
+    get_service.cache_clear()
+    return _json(result)
+
+
+@tool
+def train_sale_price_model() -> str:
+    """Entrainer, comparer et sauvegarder le meilleur modele de prix de vente."""
+    result = train_price_model()
+    get_service.cache_clear()
+    return _json(result)
+
+
+@tool
+def get_model_performance() -> str:
+    """Lire les metriques mesurees du dernier entrainement ML."""
+    return _json(read_model_performance())
+
+
 REAL_ESTATE_TOOLS = [
     predict_property_price,
     find_comparable_properties,
@@ -222,4 +245,7 @@ REAL_ESTATE_TOOLS = [
     recommend_properties,
     search_live_properties,
     run_property_scraper,
+    clean_real_estate_data,
+    train_sale_price_model,
+    get_model_performance,
 ]

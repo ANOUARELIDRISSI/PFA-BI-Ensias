@@ -20,6 +20,7 @@ def test_streamlit_app_renders_without_exception() -> None:
         "Comparateur",
         "Marche",
         "Modele ML",
+        "Insights",
         "Collecte",
         "Recherche en ligne",
         "Agent IA",

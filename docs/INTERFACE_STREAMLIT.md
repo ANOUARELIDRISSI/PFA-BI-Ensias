@@ -48,6 +48,22 @@ Lit `reports/model_metrics.json` et affiche :
 - erreurs par tranche de prix ;
 - donnees prioritaires a collecter.
 
+### Insights
+
+Propose une exploration interactive des donnees nettoyees :
+
+- filtres par ville, source et prix ;
+- indicateurs de volume, prix et surface ;
+- carte agregee par centre de ville ;
+- prix medians par ville ;
+- repartition des sources et distribution des prix ;
+- quartiers les plus representes ;
+- completude des champs ;
+- table detaillee avec liens vers les annonces.
+
+La carte est explicitement approximative tant que les annonces ne disposent
+pas de coordonnees individuelles.
+
 ### Collecte
 
 Lance les scrapers Mubawab ou Sarouty directement depuis l'interface :
@@ -57,6 +73,7 @@ Lance les scrapers Mubawab ou Sarouty directement depuis l'interface :
 - limite de pages pour Mubawab ;
 - affichage du succes, du code de sortie et du fichier produit ;
 - journal d'execution consultable.
+- commandes controlees de nettoyage, entrainement et lecture des metriques.
 
 L'interface utilise une liste stricte de scripts autorises et ne permet pas
 d'executer une commande systeme libre.

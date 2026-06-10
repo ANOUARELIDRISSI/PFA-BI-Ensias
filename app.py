@@ -10,6 +10,7 @@ import streamlit as st
 
 from real_estate.services import ListingInput, PropertyInput, RealEstateService
 from real_estate.web_search import search_properties
+from ml.runner import clean_dataset, read_model_performance, train_price_model
 from scraping.runner import run_scraper
 
 
@@ -28,6 +29,32 @@ ICONS = {
     "chat": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-5 4v-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 5v2h12V8H6Zm0 4v2h8v-2H6Z"/></svg>',
     "database": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.5 2 3 3.8 3 6v12c0 2.2 3.5 4 9 4s9-1.8 9-4V6c0-2.2-3.5-4-9-4Zm0 3c3.7 0 5.7.8 6 1-.3.2-2.3 1-6 1s-5.7-.8-6-1c.3-.2 2.3-1 6-1Zm0 14c-3.9 0-6-1-6-1v-2.7c1.5.7 3.5 1.1 6 1.1s4.5-.4 6-1.1V18s-2.1 1-6 1Zm0-5.6c-3.9 0-6-1-6-1V9.7c1.5.7 3.5 1.1 6 1.1s4.5-.4 6-1.1v2.7s-2.1 1-6 1Z"/></svg>',
     "pulse": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h4l2-7 4 13 2-6h6v-2h-4.5L13 2 9 15 7.5 11H3v2Z"/></svg>',
+    "map": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 4-6-2-6 2v18l6-2 6 2 6-2V2l-6 2Zm-5 0 4 1.3v14.4L10 18.3V4Zm-5 1.5 3-1v14l-3 1v-14Zm14 13-3 1v-14l3-1v14Z"/></svg>',
+}
+
+
+CITY_COORDINATES = {
+    "Agadir": (30.4278, -9.5981),
+    "Bouskoura": (33.4489, -7.6486),
+    "Casablanca": (33.5731, -7.5898),
+    "El Jadida": (33.2316, -8.5007),
+    "Fes": (34.0181, -5.0078),
+    "Fès": (34.0181, -5.0078),
+    "Kenitra": (34.2610, -6.5802),
+    "Kénitra": (34.2610, -6.5802),
+    "Marrakech": (31.6295, -7.9811),
+    "Meknes": (33.8935, -5.5473),
+    "Meknès": (33.8935, -5.5473),
+    "Mohammedia": (33.6861, -7.3829),
+    "Oujda": (34.6814, -1.9086),
+    "Rabat": (34.0209, -6.8416),
+    "Sale": (34.0337, -6.7985),
+    "Salé": (34.0337, -6.7985),
+    "Settat": (33.0010, -7.6166),
+    "Tanger": (35.7595, -5.8340),
+    "Tangier": (35.7595, -5.8340),
+    "Temara": (33.9287, -6.9066),
+    "Témara": (33.9287, -6.9066),
 }
 
 
@@ -404,6 +431,141 @@ def model_performance_page() -> None:
     )
 
 
+def insights_page(service: RealEstateService) -> None:
+    page_heading(
+        "map",
+        "Insights des donnees",
+        "Analysez la couverture, les prix, les quartiers et la qualite des annonces collectees.",
+    )
+    data = service.data.copy()
+    available_cities = sorted(data["city"].dropna().unique().tolist())
+    available_sources = sorted(data["source"].dropna().unique().tolist())
+
+    with st.form("insights_filters"):
+        c1, c2, c3 = st.columns(3)
+        selected_cities = c1.multiselect("Villes", available_cities)
+        selected_sources = c2.multiselect("Sources", available_sources)
+        price_range = c3.slider(
+            "Prix MAD",
+            min_value=int(data["price_mad"].min()),
+            max_value=int(data["price_mad"].max()),
+            value=(int(data["price_mad"].min()), int(data["price_mad"].max())),
+            step=50_000,
+        )
+        st.form_submit_button("Appliquer les filtres")
+
+    filtered = data[
+        data["price_mad"].between(price_range[0], price_range[1])
+    ].copy()
+    if selected_cities:
+        filtered = filtered[filtered["city"].isin(selected_cities)]
+    if selected_sources:
+        filtered = filtered[filtered["source"].isin(selected_sources)]
+
+    if filtered.empty:
+        st.warning("Aucune annonce ne correspond aux filtres.")
+        return
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Annonces", len(filtered))
+    c2.metric("Prix median", money(filtered["price_mad"].median()))
+    c3.metric("Prix median au m2", money(filtered["price_per_m2"].median()))
+    c4.metric("Surface mediane", f"{filtered['surface_m2'].median():.0f} m2")
+
+    city_map = (
+        filtered.groupby("city", as_index=False)
+        .agg(
+            listings=("price_mad", "size"),
+            median_price_mad=("price_mad", "median"),
+            median_price_per_m2=("price_per_m2", "median"),
+        )
+    )
+    city_map["latitude"] = city_map["city"].map(
+        lambda city: CITY_COORDINATES.get(str(city), (None, None))[0]
+    )
+    city_map["longitude"] = city_map["city"].map(
+        lambda city: CITY_COORDINATES.get(str(city), (None, None))[1]
+    )
+    mapped = city_map.dropna(subset=["latitude", "longitude"])
+    st.subheader("Couverture geographique")
+    if mapped.empty:
+        st.info("Aucune coordonnee disponible pour les villes filtrees.")
+    else:
+        st.map(mapped, latitude="latitude", longitude="longitude", size="listings")
+        st.caption(
+            "La carte utilise les centres de ville, car les annonces actuelles "
+            "ne contiennent pas encore de coordonnees individuelles."
+        )
+
+    left, right = st.columns(2)
+    with left:
+        st.subheader("Prix median par ville")
+        city_prices = (
+            filtered.groupby("city")["price_mad"].median().nlargest(12).sort_values()
+        )
+        st.bar_chart(city_prices, horizontal=True)
+    with right:
+        st.subheader("Annonces par source")
+        st.bar_chart(filtered["source"].value_counts())
+
+    left, right = st.columns(2)
+    with left:
+        st.subheader("Distribution des prix")
+        price_bins = pd.cut(filtered["price_mad"], bins=12)
+        distribution = filtered.groupby(price_bins, observed=True).size()
+        distribution.index = distribution.index.map(
+            lambda interval: f"{compact_money(interval.left)}-{compact_money(interval.right)}"
+        )
+        st.bar_chart(distribution)
+    with right:
+        st.subheader("Quartiers les plus representes")
+        neighborhoods = (
+            filtered[filtered["neighborhood"].ne("Unknown")]
+            .groupby(["city", "neighborhood"])
+            .agg(
+                annonces=("price_mad", "size"),
+                prix_median=("price_mad", "median"),
+                prix_m2_median=("price_per_m2", "median"),
+            )
+            .sort_values("annonces", ascending=False)
+            .head(15)
+            .reset_index()
+        )
+        st.dataframe(neighborhoods, hide_index=True, width="stretch")
+
+    st.subheader("Completude des donnees")
+    quality_fields = [
+        "price_mad", "surface_m2", "city", "neighborhood", "rooms",
+        "bedrooms", "bathrooms", "furnished", "latitude", "longitude",
+    ]
+    completeness = pd.DataFrame(
+        {
+            "Champ": quality_fields,
+            "Completude %": [
+                round(float(filtered[field].notna().mean() * 100), 1)
+                for field in quality_fields
+            ],
+        }
+    )
+    st.bar_chart(completeness.set_index("Champ"))
+
+    st.subheader("Table des annonces")
+    columns = [
+        "source", "title", "price_mad", "price_per_m2", "surface_m2",
+        "bedrooms", "bathrooms", "city", "neighborhood", "url",
+    ]
+    st.dataframe(
+        filtered[columns].sort_values("price_mad", ascending=False),
+        hide_index=True,
+        width="stretch",
+        column_config={
+            "url": st.column_config.LinkColumn("Annonce"),
+            "price_mad": st.column_config.NumberColumn("Prix MAD", format="%d"),
+            "price_per_m2": st.column_config.NumberColumn("Prix/m2", format="%d"),
+        },
+    )
+
+
 def live_search_page(cities: list[str]) -> None:
     page_heading("search", "Recherche en ligne", "Recherchez des annonces recentes et verifiez leurs sources.")
     with st.form("live_search_form"):
@@ -507,6 +669,26 @@ def collection_page() -> None:
             if result["stderr"]:
                 st.code(result["stderr"], language=None)
 
+    st.subheader("Pipeline Machine Learning")
+    c1, c2, c3 = st.columns(3)
+    if c1.button("Nettoyer les donnees", width="stretch"):
+        with st.spinner("Nettoyage des donnees en cours"):
+            result = clean_dataset()
+        get_service.clear()
+        st.success(f"{result['rows']} lignes nettoyees.")
+    if c2.button("Entrainer le modele", width="stretch"):
+        with st.spinner("Comparaison et entrainement des modeles en cours"):
+            result = train_price_model()
+        get_service.clear()
+        st.success(
+            f"Modele {result['best_model']} entraine sur {result['dataset_rows']} lignes."
+        )
+    if c3.button("Afficher les metriques", width="stretch"):
+        try:
+            st.json(read_model_performance())
+        except FileNotFoundError as error:
+            st.warning(str(error))
+
 
 def chat_page() -> None:
     page_heading("chat", "Assistant Mistral", "Interrogez les donnees avec les outils immobiliers de l'agent.")
@@ -583,6 +765,7 @@ def main() -> None:
             "Comparateur",
             "Marche",
             "Modele ML",
+            "Insights",
             "Collecte",
             "Recherche en ligne",
             "Agent IA",
@@ -599,10 +782,12 @@ def main() -> None:
     with tabs[4]:
         model_performance_page()
     with tabs[5]:
-        collection_page()
+        insights_page(service)
     with tabs[6]:
-        live_search_page(cities)
+        collection_page()
     with tabs[7]:
+        live_search_page(cities)
+    with tabs[8]:
         chat_page()
 
 

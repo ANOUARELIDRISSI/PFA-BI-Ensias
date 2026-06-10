@@ -10,7 +10,7 @@ racine par `config.py`.
 
 ## Outils disponibles
 
-L'agent dispose de huit outils dans `AI-Agent/tools.py` :
+L'agent dispose de onze outils dans `AI-Agent/tools.py` :
 
 1. `predict_property_price`
 2. `find_comparable_properties`
@@ -20,10 +20,19 @@ L'agent dispose de huit outils dans `AI-Agent/tools.py` :
 6. `recommend_properties`
 7. `search_live_properties`
 8. `run_property_scraper`
+9. `clean_real_estate_data`
+10. `train_sale_price_model`
+11. `get_model_performance`
 
 Le dernier outil lance uniquement les collecteurs autorises Mubawab et
 Sarouty. Il accepte la vente ou la location, limite le volume demande et
 retourne le code de sortie, les chemins des fichiers et les journaux.
+
+Les trois outils ML permettent d'orchestrer le cycle complet :
+
+```text
+collecte -> nettoyage -> entrainement -> evaluation -> prediction
+```
 
 Le prompt impose l'utilisation des outils pour les chiffres immobiliers. Le
 modele ne doit pas inventer un prix, une annonce ou une statistique.
