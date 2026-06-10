@@ -8,6 +8,7 @@ import pandas as pd
 import streamlit as st
 
 from real_estate.services import ListingInput, PropertyInput, RealEstateService
+from real_estate.web_search import search_properties
 
 
 ROOT = Path(__file__).resolve().parent
@@ -222,6 +223,56 @@ def market_page(service: RealEstateService, cities: list[str]) -> None:
     st.bar_chart(local.groupby("neighborhood")["price_mad"].median().nlargest(12))
 
 
+def live_search_page(cities: list[str]) -> None:
+    st.markdown(
+        f'<div class="section-title">{icon("search")}<h2>Recherche en ligne</h2></div>',
+        unsafe_allow_html=True,
+    )
+    with st.form("live_search_form"):
+        c1, c2 = st.columns(2)
+        city = c1.selectbox("Ville", cities, key="live_city")
+        transaction_label = c2.selectbox("Transaction", ["Vente", "Location"])
+        c3, c4 = st.columns(2)
+        property_type = c3.selectbox(
+            "Type de bien", ["appartement", "villa", "maison", "terrain"]
+        )
+        neighborhood = c4.text_input("Quartier facultatif", key="live_neighborhood")
+        max_results = st.slider("Nombre maximal de resultats", 4, 20, 8)
+        submitted = st.form_submit_button("Lancer la recherche")
+    if submitted:
+        with st.spinner("Recherche et verification des annonces en cours"):
+            try:
+                results = search_properties(
+                    city=city,
+                    transaction="rent" if transaction_label == "Location" else "sale",
+                    property_type=property_type,
+                    neighborhood=neighborhood or None,
+                    max_results=max_results,
+                    verify=True,
+                )
+            except Exception as error:
+                st.error(f"Recherche indisponible : {error}")
+                return
+        if not results:
+            st.warning("Aucun resultat trouve sur les domaines autorises.")
+        for item in results:
+            verification = "Verifie" if item["verified"] else "Non verifie"
+            price = money(item["price_mad"]) if item["price_mad"] else "Prix non detecte"
+            st.markdown(
+                f"""
+                <div class="result-card">
+                  <div class="rank">{html.escape(item['source'])} · {verification}</div>
+                  <h3>{html.escape(item['title'])}</h3>
+                  <p>{price} · {html.escape(item['location'] or city)}</p>
+                  <p class="small">{html.escape(item['snippet'][:280])}</p>
+                  <a href="{html.escape(item['url'])}" target="_blank">Ouvrir la source</a>
+                  <p class="small">Consulte le {html.escape(item['checked_at'])}</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+
 def chat_page() -> None:
     st.markdown(
         f'<div class="section-title">{icon("chat")}<h2>Assistant Mistral</h2></div>',
@@ -264,7 +315,16 @@ def main() -> None:
     )
     service = get_service()
     cities = sorted(service.data["city"].dropna().unique().tolist())
-    tabs = st.tabs(["Estimation", "Recommandations", "Comparateur", "Marche", "Agent IA"])
+    tabs = st.tabs(
+        [
+            "Estimation",
+            "Recommandations",
+            "Comparateur",
+            "Marche",
+            "Recherche en ligne",
+            "Agent IA",
+        ]
+    )
     with tabs[0]:
         estimator_page(service, cities)
     with tabs[1]:
@@ -274,6 +334,8 @@ def main() -> None:
     with tabs[3]:
         market_page(service, cities)
     with tabs[4]:
+        live_search_page(cities)
+    with tabs[5]:
         chat_page()
 
 

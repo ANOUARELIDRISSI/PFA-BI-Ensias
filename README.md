@@ -143,4 +143,7 @@ uv run streamlit run app.py
 ```
 
 L'interface en francais propose l'estimation, les recommandations, le
-comparateur, les statistiques du marche et le chat avec l'agent Mistral.
+comparateur, les statistiques du marche, la recherche en ligne et le chat avec
+l'agent Mistral.
+
+Documentation : [Recherche immobiliere en ligne](RECHERCHE_EN_LIGNE.md).

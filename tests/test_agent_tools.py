@@ -19,6 +19,7 @@ from tools import (
     get_market_summary,
     predict_property_price,
     recommend_properties,
+    search_live_properties,
 )
 
 
@@ -101,3 +102,27 @@ def test_agent_tool_loop(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(agent_module, "ChatMistralAI", FakeMistral)
     result = agent_module.RealEstateAgent().chat("Resume Casablanca.")
     assert "Casablanca" in result
+
+
+def test_live_search_tool(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        "tools.search_properties",
+        lambda **_: [
+            {
+                "title": "Annonce test",
+                "url": "https://www.mubawab.ma/fr/a/1",
+                "source": "Mubawab",
+                "snippet": "Appartement",
+                "price_mad": 1_000_000,
+                "location": "Casablanca",
+                "checked_at": "2026-06-10T00:00:00+00:00",
+                "verified": True,
+                "status_code": 200,
+            }
+        ],
+    )
+    result = json.loads(
+        search_live_properties.invoke({"city": "Casablanca", "max_results": 4})
+    )
+    assert result[0]["verified"] is True
+    assert result[0]["source"] == "Mubawab"

@@ -16,6 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from real_estate.services import ListingInput, PropertyInput, RealEstateService
+from real_estate.web_search import search_properties
 
 
 @lru_cache(maxsize=1)
@@ -172,6 +173,27 @@ def recommend_properties(
     )
 
 
+@tool
+def search_live_properties(
+    city: str,
+    transaction: str = "sale",
+    property_type: str = "appartement",
+    neighborhood: str = "",
+    max_results: int = 8,
+) -> str:
+    """Chercher des annonces recentes sur des domaines immobiliers autorises."""
+    return _json(
+        search_properties(
+            city=city,
+            transaction=transaction,
+            property_type=property_type,
+            neighborhood=neighborhood or None,
+            max_results=max_results,
+            verify=True,
+        )
+    )
+
+
 REAL_ESTATE_TOOLS = [
     predict_property_price,
     find_comparable_properties,
@@ -179,4 +201,5 @@ REAL_ESTATE_TOOLS = [
     get_market_summary,
     compare_properties,
     recommend_properties,
+    search_live_properties,
 ]
