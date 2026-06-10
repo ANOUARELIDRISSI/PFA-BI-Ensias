@@ -69,7 +69,7 @@ Commandes disponibles :
 Pour tester l'agent avec un seul message :
 
 ```powershell
-uv run python -c "from agent import RealEstateAgent; print(RealEstateAgent().chat('Bonjour, presente-toi en une phrase.'))"
+uv run python -c "import sys; sys.path.insert(0, 'AI-Agent'); from agent import RealEstateAgent; print(RealEstateAgent().chat('Bonjour, presente-toi en une phrase.'))"
 ```
 
 Le test est reussi si Mistral retourne une reponse en francais sans erreur.
@@ -89,7 +89,7 @@ Cette commande confirme que la cle est chargee sans afficher sa valeur.
 Verifier que :
 
 - le fichier s'appelle exactement `.env` ;
-- il se trouve dans `AI-Agent/` ;
+- il se trouve a la racine `PFA-BI-Ensias/` ;
 - la variable s'appelle exactement `MISTRAL_API_KEY`.
 
 ### `uv` n'est pas reconnu

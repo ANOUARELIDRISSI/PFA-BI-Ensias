@@ -127,12 +127,15 @@ PFA-BI-Ensias/
 
 ## Statut
 
-Le projet est actuellement en phase d'initialisation et de conception.
+Le projet dispose maintenant de scrapers de vente et de location, d'un
+pipeline ML de prix de vente, de services immobiliers, d'un agent Mistral et
+d'une interface Streamlit en francais.
 
 ## Guides de demarrage
 
 - [Demarrage des scrapers](DEMARRAGE_SCRAPERS.md)
 - [Demarrage de l'agent IA](DEMARRAGE_AGENT.md)
+- [Documentation complete](docs/README.md)
 
 ## Interface Streamlit
 
